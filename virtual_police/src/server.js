@@ -7,15 +7,15 @@ var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var htmlFileToBeChanged ;
 // sql stuff
-const mysql= require('mysql');
+// const mysql= require('mysql');
 
-const connection=mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'wrong-password',
-    database:'testDb',
-    insecureAuth:'true'
-});
+// const connection=mysql.createConnection({
+//     host:'localhost',
+//     user:'root',
+//     password:'wrong-password',
+//     database:'testDb',
+//     insecureAuth:'true'
+// });
 
 app.use(bodyParser.json())
 
@@ -61,30 +61,45 @@ app.post('/generateFIR',urlencodedParser,function(req,res){
     let applicant_name = req.body.applicant_name;
     let incident = req.body.incident;
 
-    htmlFileToBeChanged = parse(html);
-    htmlFileToBeChanged.querySelector("#person_name").setAttribute('value',name);
-    htmlFileToBeChanged.querySelector("#person_address").setAttribute('value',address);
-    htmlFileToBeChanged.querySelector("#person_mobile_no").setAttribute('value',mobile);
-    htmlFileToBeChanged.querySelector("#person_email_id").setAttribute('value',email);
-    htmlFileToBeChanged.querySelector("#date").setAttribute('value',date);
-    htmlFileToBeChanged.querySelector("#subject").setAttribute('value', subject);
-    htmlFileToBeChanged.querySelector("#incident").setAttribute('value',incident);
-    htmlFileToBeChanged.querySelector("#police_station_name").setAttribute('value',police_station_name);
-    htmlFileToBeChanged.querySelector("#police_station_address").setAttribute('value',police_station_address);
-    htmlFileToBeChanged.querySelector("#police_station_pin").setAttribute('value',police_station_pin);
-    htmlFileToBeChanged.querySelector("#applicant_name").setAttribute('value',applicant_name);
+    // htmlFileToBeChanged = parse(html);
+    // htmlFileToBeChanged.querySelector("#person_name").setAttribute('value',name);
+    // htmlFileToBeChanged.querySelector("#person_address").setAttribute('value',address);
+    // htmlFileToBeChanged.querySelector("#person_mobile_no").setAttribute('value',mobile);
+    // htmlFileToBeChanged.querySelector("#person_email_id").setAttribute('value',email);
+    // htmlFileToBeChanged.querySelector("#date").setAttribute('value',date);
+    // htmlFileToBeChanged.querySelector("#subject").setAttribute('value', subject);
+    // htmlFileToBeChanged.querySelector("#incident").setAttribute('value',incident);
+    // htmlFileToBeChanged.querySelector("#police_station_name").setAttribute('value',police_station_name);
+    // htmlFileToBeChanged.querySelector("#police_station_address").setAttribute('value',police_station_address);
+    // htmlFileToBeChanged.querySelector("#police_station_pin").setAttribute('value',police_station_pin);
+    // htmlFileToBeChanged.querySelector("#applicant_name").setAttribute('value',applicant_name);
 
     console.log("name is " + req.body.name);
 
-    pdf.create(htmlFileToBeChanged.toString(), options).toFile('./pdfForm.pdf', function(err, res) {
-        if (err)
-            return console.log(err);
-        else{
-            console.log(res);
-        }
-    });
+    // pdf.create(htmlFileToBeChanged.toString(), options).toFile('./pdfForm.pdf', function(err, res) {
+    //     if (err)
+    //         return console.log(err);
+    //     else{
+    //         console.log(res);
+    //     }
+    // });
     // res.send(htmlFileToBeChanged.toString());
-    res.send(req.body);
+    var currentdate = new Date();
+    var timestamp = currentdate.getTime();
+
+    var spawn = require("child_process").spawn; 
+    var process = spawn('python',["../firs/generateFIR.py", 
+                            name, 
+                            address,mobile,email,date,police_station_name
+                            ,police_station_address,police_station_pin
+                            ,subject,incident,timestamp] ); 
+    
+    process.stdout.on('data', function(data) { 
+                // res.send(data.toString());
+                console.log("file created is "+data.toString()); 
+                res.send("file created is "+data.toString());
+    } ) 
+    res.send("dont know what happened ");
 });
 
 app.get('/getAll',function(request, response){
